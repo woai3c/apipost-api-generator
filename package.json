@@ -1,10 +1,20 @@
 {
   "name": "apipost-api-generator",
   "description": "根据 apipost 导出的接口数据生成前端接口",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "dist/apipost-api-generator.js",
   "module": "dist/apipost-api-generator.mjs",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/woai3c/apipost-api-generator.git"
+  },
+  "author": "woai3c <411020382@qq.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/woai3c/apipost-api-generator/issues"
+  },
+  "homepage": "https://github.com/woai3c/apipost-api-generator#readme",
   "bin": {
     "apipost-api-generator": "dist/apipost-api-generator.js"
   },
