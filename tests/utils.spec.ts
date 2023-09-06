@@ -1,4 +1,5 @@
-import { getTypeByValue, removeJSONComments } from '@/utils'
+import { getTypeByValue } from '@/parse/parseAPIOptions'
+import { removeJSONComments } from '@/utils'
 
 describe('apipost test', () => {
     test('utils getTypeByValue', () => {

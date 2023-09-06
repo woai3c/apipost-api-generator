@@ -1,41 +1,39 @@
 /* eslint-disable camelcase */
-import type { API, APIPostConfig, APIRequestBodyRawSchema, APIRequestParameter, APIResponse } from '@/types'
-import { addIndent, capitalizeWord, getTypeByValue, removeJSONComments, safeTransformType } from '@/utils'
+import type { API, APIPostConfig, APIRequestParameter } from '@/types'
+import { addIndent, removeJSONComments } from '@/utils'
+import {
+    getAPIName,
+    getBodyPropertyType,
+    getDTOType,
+    getInterfaceOrDTO,
+    getResponseTypeCode,
+    parseBodyRaw,
+    parseBodyRawPara,
+    parseURL,
+    safeTransformType,
+} from './parseAPIOptions'
 
-export default function parseAPI(api: API, config?: APIPostConfig) {
+let importDTOClassSet: Set<string> = new Set()
+export default function parseAPI(api: API, config?: APIPostConfig): { code: string; importDTOClassSet: Set<string> } {
     let code = ''
-    let requestTypeName = ''
     let requestOptionsType: '' | 'array' | 'params' | 'data' = ''
+    const generateType = config?.type || 'api'
     const { request, response, method = '', name } = api
     const { body, query, resful } = request
     const url = parseURL(request.url)
+    const requestTypeName = `${method}${getAPIName(url, method, true)}${generateType === 'api' ? 'Options' : 'DTO'}`
+    importDTOClassSet = new Set()
 
     if (body?.mode === 'form-data' && body.parameter.filter((item) => item.key).length) {
-        requestTypeName = `${method}${getAPIName(url, method, true)}Options`
-        code += `export interface ${requestTypeName} {\n`
+        code += getInterfaceOrDTO(generateType, requestTypeName)
         requestOptionsType = 'data'
 
         body.parameter.forEach((param: APIRequestParameter) => {
-            const { field_type, key, type, description, not_null } = param
-            if (key) {
-                code += `${addIndent(1)}${key}`
-
-                // 可选参数
-                if (not_null === -1) {
-                    code += '?'
-                }
-
-                code += `: ${type === 'File' ? type : safeTransformType(field_type)}`
-                if (description) {
-                    code += ` // ${description}`
-                }
-
-                code += '\n'
-            }
+            code += getInterfaceOrDTOPropertyCode(generateType, param)
         })
 
         const keys = body.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
-        code += parseRestfulParameter(keys, resful?.parameter)
+        code += parseRestfulParameter(generateType, keys, resful?.parameter)
         code += '}\n\n'
     } else if (body?.mode === 'json' && (body.raw_schema || body.raw || body.raw_para.length)) {
         if (!body?.raw_schema?.properties) {
@@ -65,18 +63,27 @@ export default function parseAPI(api: API, config?: APIPostConfig) {
         }
 
         if (body.raw_schema) {
-            requestTypeName = `${method}${getAPIName(url, method, true)}Options`
             const { properties = {}, required = [], type, items } = body.raw_schema
             if (type === 'array') {
                 requestOptionsType = 'array'
                 code += `export type ${requestTypeName} = ${items?.type || 'any'}[]\n\n`
             } else {
                 requestOptionsType = 'data'
-                code += `export interface ${requestTypeName} {\n`
+                code += getInterfaceOrDTO(generateType, requestTypeName)
 
                 const keys = Object.keys(properties)
                 keys.forEach((key) => {
                     const { type, description, oneOf, allOf, anyOf, items } = properties[key]
+                    if (generateType === 'dto') {
+                        const dtoType = getDTOType(type)
+                        importDTOClassSet.add(dtoType)
+                        code += `\n${addIndent(1)}@${dtoType}()\n`
+
+                        if (required.includes(key)) {
+                            code += `${addIndent(1)}@IsNotEmpty()\n`
+                        }
+                    }
+
                     code += `${addIndent(1)}${key}`
 
                     // 可选参数
@@ -93,6 +100,7 @@ export default function parseAPI(api: API, config?: APIPostConfig) {
                                     .filter(Boolean)
                             ),
                         ]
+
                         code += `: ${types.join(' | ')}`
                     } else {
                         code += `: ${getBodyPropertyType(type, items?.type)}`
@@ -105,66 +113,35 @@ export default function parseAPI(api: API, config?: APIPostConfig) {
                     code += '\n'
                 })
 
-                code += parseRestfulParameter(keys, resful?.parameter)
+                code += parseRestfulParameter(generateType, keys, resful?.parameter)
                 code += '}\n\n'
             }
         }
     } else if (body?.mode === 'urlencoded' && body.parameter.filter((item) => item.key).length) {
-        requestTypeName = `${method}${getAPIName(url, method, true)}Options`
-        code += `export interface ${requestTypeName} {\n`
+        code += getInterfaceOrDTO(generateType, requestTypeName)
         requestOptionsType = 'data'
 
         body.parameter.forEach((param: APIRequestParameter) => {
-            const { field_type, key, type, description, not_null } = param
-            if (key) {
-                code += `${addIndent(1)}${key}`
-
-                // 可选参数
-                if (not_null === -1) {
-                    code += '?'
-                }
-
-                code += `: ${type === 'File' ? type : safeTransformType(field_type)}`
-                if (description) {
-                    code += ` // ${description}`
-                }
-
-                code += '\n'
-            }
+            code += getInterfaceOrDTOPropertyCode(generateType, param)
         })
 
         const keys = body.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
-        code += parseRestfulParameter(keys, resful?.parameter)
+        code += parseRestfulParameter(generateType, keys, resful?.parameter)
         code += '}\n\n'
     } else if (query?.parameter?.filter((item) => item.key).length) {
-        requestTypeName = `${method}${getAPIName(url, method, true)}Options`
-        code += `export interface ${requestTypeName} {\n`
+        code += getInterfaceOrDTO(generateType, requestTypeName)
         requestOptionsType = 'params'
 
         const keys = query.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
-        query.parameter.forEach((item: APIRequestParameter) => {
-            const { description, key, not_null, field_type } = item
-            if (!key) return
-
-            code += `${addIndent(1)}${key}`
-
-            // 可选参数
-            if (not_null === -1) {
-                code += '?'
-            }
-
-            code += `: ${safeTransformType(field_type)}`
-
-            if (description) {
-                code += ` // ${description}`
-            }
-
-            code += '\n'
+        query.parameter.forEach((param: APIRequestParameter) => {
+            code += getInterfaceOrDTOPropertyCode(generateType, param)
         })
 
-        code += parseRestfulParameter(keys, resful?.parameter)
+        code += parseRestfulParameter(generateType, keys, resful?.parameter)
         code += '}\n\n'
     }
+
+    if (generateType === 'dto') return { code, importDTOClassSet }
 
     const responseTypeName = `${method}${getAPIName(url, method, true)}Response`
     const responseCode = getResponseTypeCode(responseTypeName, response)
@@ -219,13 +196,16 @@ export default function parseAPI(api: API, config?: APIPostConfig) {
     code += '}\n\n'
 
     if (typeof config?.apiLoader === 'function') {
-        return config.apiLoader(code)
+        return {
+            importDTOClassSet,
+            code: config.apiLoader(code),
+        }
     }
 
-    return code
+    return { code, importDTOClassSet }
 }
 
-function parseRestfulParameter(keys: string[], data?: APIRequestParameter[]) {
+function parseRestfulParameter(generateType: 'api' | 'dto', keys: string[], data?: APIRequestParameter[]) {
     if (!data) return ''
 
     let code = ''
@@ -233,6 +213,14 @@ function parseRestfulParameter(keys: string[], data?: APIRequestParameter[]) {
         const { description, key, field_type } = item
         // 参数名不存在或参数名重复
         if (!key || keys.includes(key)) return
+
+        const finalType = safeTransformType(field_type)
+        if (generateType === 'dto') {
+            const dtoType = getDTOType(finalType)
+            importDTOClassSet.add(dtoType)
+            code += `\n${addIndent(1)}@${dtoType}()\n`
+            code += `${addIndent(1)}@IsNotEmpty()\n`
+        }
 
         code += `${addIndent(1)}${key}: ${safeTransformType(field_type)}`
 
@@ -246,196 +234,35 @@ function parseRestfulParameter(keys: string[], data?: APIRequestParameter[]) {
     return code
 }
 
-function parseURL(url: string, requestOptionsType = '', needTransform = false) {
-    const result = url.split('?')[0]
-    if (!needTransform) return result
-    const prefix = requestOptionsType === 'array' || !requestOptionsType ? '' : 'options.'
-    // :id => ${options.id}
-    return result.replace(/:\w+/g, (match: string) => `\${${prefix}${match.slice(1)}}`)
-}
-
-function parseBodyRawPara(data: APIRequestParameter[]) {
-    const result: APIRequestBodyRawSchema = {
-        type: 'object',
-        description: '',
-        properties: {},
-        required: [],
-    }
-
-    data.forEach((item) => {
-        if (item.key) {
-            result.properties![item.key] = {
-                type: safeTransformType(item.field_type),
-                description: item.description,
-            }
-
-            result.required!.push(item.key)
-        }
-    })
-
-    return result
-}
-
-function getResponseTypeCode(responseTypeName: string, response?: APIResponse) {
-    if (!response?.success) return ''
-    const { raw, parameter, expect } = response.success
-    if (!raw && !parameter.length && !expect?.mock && !expect?.schema) return ''
+function getInterfaceOrDTOPropertyCode(generateType: 'api' | 'dto', param: APIRequestParameter) {
+    const { field_type, key, type, description, not_null } = param
+    if (!key) return ''
 
     let code = ''
-    if (raw) {
-        try {
-            const data = JSON.parse(removeJSONComments(raw))
-            if (Array.isArray(data)) {
-                code += getArrayTypeCode(data[0])
-            } else if (typeof data === 'object' && Object.keys(data).length) {
-                code += getObjectTypeCode(data)
-            } else if (data[0] !== undefined) {
-                code += getArrayTypeCode(data[0])
-            }
-        } catch (error) {}
-    } else if (parameter.length) {
-        const data = responseRawDataToObject(parameter)
-        if (Object.keys(data).length) {
-            code += getObjectTypeCode(data)
-        }
-    } else if (expect.mock) {
-        try {
-            const data = JSON.parse(removeJSONComments(expect.mock))
-            if (Array.isArray(data)) {
-                code += getArrayTypeCode(data[0])
-            } else if (typeof data === 'object' && Object.keys(data).length) {
-                code += getObjectTypeCode(data)
-            }
-        } catch (error) {}
-    } else if (expect.schema) {
-        const { type, properties, required } = expect.schema
-        if (type === 'array') {
-            code += `export type ${responseTypeName} = any[]\n\n`
-        } else if (type === 'object') {
-            code += `export interface ${responseTypeName} {\n`
-            Object.keys(properties).forEach((key) => {
-                code += `${addIndent(1)}${key}`
-                if (!required.includes(key)) {
-                    code += '?'
-                }
+    const finalType = type === 'File' ? type : safeTransformType(field_type)
+    if (generateType === 'dto') {
+        const dtoType = getDTOType(finalType)
+        importDTOClassSet.add(dtoType)
+        code += `\n${addIndent(1)}@${dtoType}()\n`
 
-                code += `: ${getBodyPropertyType(properties[key].type)}\n`
-            })
-
-            code += '}\n\n'
+        if (not_null !== -1) {
+            code += `${addIndent(1)}@IsNotEmpty()\n`
         }
     }
 
-    function getArrayTypeCode(value: any) {
-        return `export type ${responseTypeName} = ${getTypeByValue(value)}[]\n\n`
+    code += `${addIndent(1)}${key}`
+
+    // 可选参数
+    if (not_null === -1) {
+        code += '?'
     }
 
-    function getObjectTypeCode(data: AnyObject) {
-        let result = `export interface ${responseTypeName} {\n`
-
-        Object.keys(data).forEach((key) => {
-            result += `${addIndent(1)}${key}: ${getTypeByValue(data[key])}\n`
-        })
-
-        result += '}\n\n'
-        return result
+    code += `: ${finalType}`
+    if (description) {
+        code += ` // ${description}`
     }
+
+    code += '\n'
 
     return code
-}
-
-function getAPIName(path: string, method: string, noMethod = false) {
-    const apiName = path
-        .replace(/\.|\d+/g, '') // 清除数字和 .
-        .split('/')
-        .map((item: string) => {
-            if (item.startsWith(':')) {
-                item = item.slice(1)
-            }
-
-            return item
-                .split('-')
-                .map((word: any) => capitalizeWord(word))
-                .join('')
-        })
-        .filter(Boolean)
-        .join('')
-        .replace(/:/g, '') // 清除多余的冒号
-
-    if (noMethod) return apiName
-    return `${method.toLowerCase()}${apiName}`
-}
-
-function getBodyPropertyType(type: string, subType = '') {
-    if (type === 'array') {
-        if (subType) {
-            return subType + '[]'
-        }
-
-        return 'any[]'
-    }
-
-    if (type === 'object') return 'Record<string, any>'
-
-    return type
-}
-
-function parseBodyRaw(data: AnyObject) {
-    if (Array.isArray(data)) {
-        const result: APIRequestBodyRawSchema = {
-            type: 'array',
-            description: '',
-            items: {
-                type: getTypeByValue(data[0]),
-            },
-        }
-
-        return result
-    }
-
-    const result: APIRequestBodyRawSchema = {
-        type: 'object',
-        description: '',
-        properties: {},
-        required: [],
-    }
-
-    Object.keys(data).forEach((key) => {
-        result.properties![key] = {
-            type: getTypeByValue(data[key]),
-        }
-    })
-
-    return result
-}
-
-/**
- * [{ key: 'test' }, { key: 'test.a' }, { key: 'test.b' }] => { test: { a: '', b: '' } }
- */
-function responseRawDataToObject(data: APIRequestParameter[]) {
-    let result: AnyObject = {}
-    data.forEach((item) => {
-        if (item.key) {
-            const keys = item.key.split('.')
-            if (keys.length === 1) {
-                result[item.key] = item.value
-                return
-            }
-
-            let parent = result
-            keys.forEach((key, index) => {
-                if (!parent[key]) {
-                    parent[key] = {}
-                }
-
-                if (index === keys.length - 1) {
-                    parent[key] = item.value
-                } else {
-                    parent = parent[key]
-                }
-            })
-        }
-    })
-
-    return result
 }

@@ -1,7 +1,7 @@
 module.exports = {
     // apipost 接口数据文件
     entry: './apipost.json',
-    // 文件生成时自动添加头部的代码 default: import request from 'axios'
+    // 文件生成时自动添加头部的代码
     fileHeader: "import request from '@/utils/request'\n\n",
     // 文件生成时自动添加底部的代码
     fileFooter: '',
@@ -19,4 +19,6 @@ module.exports = {
     output: '',
     // 输出目录前是否要清空目录 default: true
     clear: true,
+    // 'api' | 'dto'，api 生成前端接口 文件，dto 生成 nestjs dto 文件
+    type: 'api',
 }

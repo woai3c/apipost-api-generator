@@ -6,5 +6,5 @@ import { resolve } from 'path'
 
 test('parse API dynamicPath', () => {
     const expectCode = readFileSync(resolve(__dirname, './result.txt'), 'utf-8')
-    expect(parseAPI(json.apis[0] as unknown as API)).toBe(expectCode)
+    expect(parseAPI(json.apis[0] as unknown as API).code).toBe(expectCode)
 })

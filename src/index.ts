@@ -27,10 +27,6 @@ if (!apiPostJSON.apis || !Array.isArray(apiPostJSON.apis)) {
     throw new Error('not a valid apipost json')
 }
 
-if (!config.fileHeader) {
-    config.fileHeader = "import request from 'axios'\n\n"
-}
-
 if (!config.output) {
     config.output = 'api-post-files'
 }
@@ -48,6 +44,7 @@ writeFileTree(
     {
         name: config.output,
         children: files,
+        importDTOClassSet: new Set(),
     },
     config
 )

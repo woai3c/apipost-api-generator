@@ -143,6 +143,7 @@ export interface APIFile {
     name: string
     code?: string
     children: APIFile[]
+    importDTOClassSet: Set<string>
 }
 
 export interface APIPostConfig {
@@ -153,4 +154,5 @@ export interface APIPostConfig {
     fileNameMap: Record<string, string>
     output: string
     clear: boolean
+    type: 'api' | 'dto'
 }

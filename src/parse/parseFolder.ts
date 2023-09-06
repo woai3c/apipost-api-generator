@@ -7,12 +7,15 @@ export default function parseFolder(apis: API[], config: APIPostConfig) {
             name: api.name,
             code: '',
             children: [],
+            importDTOClassSet: new Set(),
         }
 
         if (api.target_type === 'folder') {
             apiFile.children = parseFolder(api.children, config)
         } else {
-            apiFile.code += parseAPI(api, config)
+            const { code, importDTOClassSet } = parseAPI(api, config)
+            apiFile.code += code
+            apiFile.importDTOClassSet = new Set([...apiFile.importDTOClassSet, ...importDTOClassSet])
         }
 
         return apiFile

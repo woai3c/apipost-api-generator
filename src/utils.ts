@@ -24,24 +24,16 @@ export function removeJSONComments(str: string) {
     return result
 }
 
-const dataTypeMap = {
-    Integer: 'number',
-    RegExp: 'string',
-    Date: 'string',
-    Float: 'number',
-}
+export function getCodeWithDTO(file: APIFile, config: APIPostConfig) {
+    if (config.type === 'dto') {
+        const arr = Array.from(file.importDTOClassSet)
+        arr.push('IsNotEmpty')
+        if (arr.length) {
+            file.code = `import { ${arr.join(', ')} } from 'class-validator'\n\n` + file.code
+        }
+    }
 
-export function safeTransformType(type: string) {
-    const result = dataTypeMap[type as keyof typeof dataTypeMap]
-    if (result) return result
-    return type.toLowerCase()
-}
-
-export function getTypeByValue(value: any): string {
-    if (value === undefined) return 'any'
-    if (Array.isArray(value)) return getTypeByValue(value[0]) + '[]'
-    if (typeof value === 'object') return 'Record<string, any>'
-    return typeof value
+    return file.code || ''
 }
 
 export function writeFileTree(dir: string, file: APIFile, config: APIPostConfig) {
@@ -55,7 +47,8 @@ export function writeFileTree(dir: string, file: APIFile, config: APIPostConfig)
 
     if (file.code) {
         fs.ensureDirSync(dir)
-        let code = file.code
+        let code = getCodeWithDTO(file, config)
+
         if (config.fileHeader) {
             code = config.fileHeader + code
         }
@@ -83,6 +76,15 @@ export function writeFileTree(dir: string, file: APIFile, config: APIPostConfig)
          *   - files.ts -> a + b 合成
          *   - c.ts -> z + x 合成
          */
-        fs.writeFileSync(join(dir, file.children?.length ? fileName : '', fileName + '.ts'), code)
+        let finalFileName = ''
+        if (file.children?.length) {
+            finalFileName = join(dir, fileName)
+            fs.ensureDirSync(finalFileName)
+            finalFileName = join(finalFileName, fileName + '.ts')
+        } else {
+            finalFileName = join(dir, fileName + '.ts')
+        }
+
+        fs.writeFileSync(finalFileName, code)
     }
 }

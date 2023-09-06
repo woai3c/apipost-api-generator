@@ -36,6 +36,7 @@ function mergeAPIFile(file: APIFile) {
     file.children.forEach((child) => {
         if (child.code && !child.children.length) {
             file.code += child.code
+            file.importDTOClassSet = new Set([...file.importDTOClassSet, ...child.importDTOClassSet])
         } else if (child.children.length) {
             newChildren.push(mergeAPIFile(child))
         }
