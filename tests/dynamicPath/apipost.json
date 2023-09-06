@@ -1,0 +1,67 @@
+{
+	"project": {},
+	"apis": [
+		{
+			"target_type": "api",
+			"name": "查询项目详情",
+			"mark": "developing",
+			"sort": 3,
+			"tags": [],
+			"method": "GET",
+			"mock": "{}",
+			"mock_url": "/assembly/projects/:id",
+			"request": {
+				"url": "/assembly/projects/:id",
+				"description": "",
+				"event": {
+					"pre_script": "",
+					"test": ""
+				},
+				"resful": {
+					"parameter": [
+						{
+							"key": "id",
+							"description": "",
+							"is_checked": 1,
+							"type": "Text",
+							"not_null": 1,
+							"field_type": "String",
+							"value": "7016331547402190848"
+						}
+					]
+				}
+			},
+			"response": {
+				"success": {
+					"raw": "",
+					"parameter": [],
+					"expect": {
+						"name": "成功",
+						"isDefault": 1,
+						"code": 200,
+						"contentType": "json",
+						"verifyType": "mock",
+						"mock": "{\r\n    \"name\":\"项目名称\",\r\n    \"id\":\"主键id\",\r\n    \"config\":{\r\n        \"dataSource\":{\r\n            \"api\":[]\r\n        },\r\n        \"variables\":{}\r\n    }\r\n}",
+						"schema": []
+					}
+				},
+				"error": {
+					"raw": "",
+					"parameter": [],
+					"expect": {
+						"name": "失败",
+						"isDefault": -1,
+						"code": 404,
+						"contentType": "json",
+						"verifyType": "schema",
+						"mock": "",
+						"schema": []
+					}
+				}
+			},
+			"children": []
+		}
+	],
+	"envs": [],
+	"models": []
+}

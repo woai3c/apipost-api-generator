@@ -1,0 +1,150 @@
+{
+	"project": {},
+	"apis": [
+		{
+			"target_type": "api",
+			"name": "test api",
+			"mark": "developing",
+			"sort": 133,
+			"tags": [],
+			"method": "POST",
+			"mock": "{}",
+			"mock_url": "/test/:id",
+			"request": {
+				"url": "/test/:id",
+				"description": "",
+				"event": {
+					"pre_script": "",
+					"test": ""
+				},
+				"body": {
+					"mode": "urlencoded",
+					"parameter": [
+						{
+							"description": "",
+							"field_type": "String",
+							"is_checked": 1,
+							"key": "a",
+							"value": "122",
+							"not_null": 1,
+							"type": "Text"
+						},
+						{
+							"description": "",
+							"field_type": "String",
+							"is_checked": 1,
+							"key": "b",
+							"value": "12121",
+							"not_null": 1,
+							"type": "Text"
+						}
+					],
+					"raw": "",
+					"raw_para": [],
+					"raw_schema": {
+						"type": "object"
+					}
+				},
+				"resful": {
+					"parameter": [
+						{
+							"key": "id",
+							"description": "",
+							"is_checked": 1,
+							"type": "Text",
+							"not_null": 1,
+							"field_type": "String",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": {
+				"success": {
+					"raw": "[{\r\n    \"data\": [],\r\n    \"test\": {\r\n        \"a\": 100,\r\n        \"b\": \"123\"\r\n    },\r\n    \"code\": 0,\r\n    \"msg\": \"\"\r\n}]",
+					"parameter": [
+						{
+							"key": "data",
+							"value": "",
+							"description": "",
+							"not_null": 1,
+							"field_type": "Array",
+							"type": "Text",
+							"is_checked": 1
+						},
+						{
+							"key": "test",
+							"value": "",
+							"description": "",
+							"not_null": 1,
+							"field_type": "Object",
+							"type": "Text",
+							"is_checked": 1
+						},
+						{
+							"key": "test.a",
+							"value": "100",
+							"description": "",
+							"not_null": 1,
+							"field_type": "Integer",
+							"type": "Text",
+							"is_checked": 1
+						},
+						{
+							"key": "test.b",
+							"value": "123",
+							"description": "",
+							"not_null": 1,
+							"field_type": "String",
+							"type": "Text",
+							"is_checked": 1
+						},
+						{
+							"key": "code",
+							"value": "0",
+							"description": "",
+							"not_null": 1,
+							"field_type": "Integer",
+							"type": "Text",
+							"is_checked": 1
+						},
+						{
+							"key": "msg",
+							"value": "",
+							"description": "",
+							"not_null": 1,
+							"field_type": "String",
+							"type": "Text",
+							"is_checked": 1
+						}
+					],
+					"expect": {
+						"name": "成功",
+						"isDefault": 1,
+						"code": 200,
+						"contentType": "json",
+						"verifyType": "schema",
+						"mock": "",
+						"schema": {}
+					}
+				},
+				"error": {
+					"raw": "",
+					"parameter": [],
+					"expect": {
+						"name": "失败",
+						"isDefault": -1,
+						"code": 404,
+						"contentType": "json",
+						"verifyType": "schema",
+						"mock": "",
+						"schema": {}
+					}
+				}
+			},
+			"children": []
+		}
+	],
+	"envs": [],
+	"models": []
+}

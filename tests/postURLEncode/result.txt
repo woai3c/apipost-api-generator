@@ -1,0 +1,19 @@
+export interface POSTTestIdOptions {
+    a: string
+    b: string
+    id: string
+}
+
+export type POSTTestIdResponse = Record<string, any>[]
+
+/**
+ * test api
+ */
+export function postTestId(options: POSTTestIdOptions): Promise<POSTTestIdResponse> {
+    return request({
+        url: `/test/${options.id}`,
+        method: 'POST',
+        data: new URLSearchParams(options as unknown as Record<string, string>),
+    })
+}
+

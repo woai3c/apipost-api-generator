@@ -1,0 +1,20 @@
+export interface GETAssemblyProjectsOptions {
+    page: string
+    limit: string
+    name: string
+    creator: string
+    createTimeFrom: string
+    createTimeTo: string
+}
+
+/**
+ * 查询项目列表
+ */
+export function getAssemblyProjects(options: GETAssemblyProjectsOptions) {
+    return request({
+        url: `/assembly/projects`,
+        method: 'GET',
+        params: options,
+    })
+}
+

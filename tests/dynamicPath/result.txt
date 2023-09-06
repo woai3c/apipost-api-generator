@@ -1,0 +1,16 @@
+export interface GETAssemblyProjectsIdResponse {
+    name: string
+    id: string
+    config: Record<string, any>
+}
+
+/**
+ * 查询项目详情
+ */
+export function getAssemblyProjectsId(id: string): Promise<GETAssemblyProjectsIdResponse> {
+    return request({
+        url: `/assembly/projects/${id}`,
+        method: 'GET',
+    })
+}
+

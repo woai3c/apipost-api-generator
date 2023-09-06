@@ -1,0 +1,118 @@
+{
+	"project": {},
+	"apis": [
+		{
+			"target_type": "api",
+			"name": "查询项目列表",
+			"mark": "developing",
+			"sort": 4,
+			"tags": [],
+			"method": "GET",
+			"mock": "{}",
+			"mock_url": "/assembly/projects",
+			"request": {
+				"url": "/assembly/projects?page=1&limit=10&name=页面&creator=gis&createTimeFrom=&createTimeTo=",
+				"description": "",
+				"event": {
+					"pre_script": "",
+					"test": ""
+				},
+				"body": {
+					"mode": "form-data",
+					"parameter": [],
+					"raw": "",
+					"raw_para": []
+				},
+				"query": {
+					"parameter": [
+						{
+							"description": "",
+							"is_checked": 1,
+							"key": "page",
+							"type": "Text",
+							"not_null": 1,
+							"field_type": "String",
+							"value": "1"
+						},
+						{
+							"description": "",
+							"is_checked": 1,
+							"key": "limit",
+							"type": "Text",
+							"not_null": 1,
+							"field_type": "String",
+							"value": "10"
+						},
+						{
+							"description": "",
+							"is_checked": 1,
+							"key": "name",
+							"type": "Text",
+							"not_null": 1,
+							"field_type": "String",
+							"value": "页面"
+						},
+						{
+							"description": "",
+							"is_checked": 1,
+							"key": "creator",
+							"type": "Text",
+							"not_null": 1,
+							"field_type": "String",
+							"value": "gis"
+						},
+						{
+							"description": "",
+							"is_checked": 1,
+							"key": "createTimeFrom",
+							"type": "Text",
+							"not_null": 1,
+							"field_type": "String",
+							"value": ""
+						},
+						{
+							"description": "",
+							"is_checked": 1,
+							"key": "createTimeTo",
+							"type": "Text",
+							"not_null": 1,
+							"field_type": "String",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": {
+				"success": {
+					"raw": "",
+					"parameter": [],
+					"expect": {
+						"name": "成功",
+						"isDefault": 1,
+						"code": 200,
+						"contentType": "json",
+						"verifyType": "schema",
+						"mock": "",
+						"schema": []
+					}
+				},
+				"error": {
+					"raw": "",
+					"parameter": [],
+					"expect": {
+						"name": "失败",
+						"isDefault": -1,
+						"code": 404,
+						"contentType": "json",
+						"verifyType": "schema",
+						"mock": "",
+						"schema": []
+					}
+				}
+			},
+			"children": []
+		}
+	],
+	"envs": [],
+	"models": []
+}

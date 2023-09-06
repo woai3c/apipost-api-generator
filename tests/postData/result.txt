@@ -1,0 +1,16 @@
+export interface POSTAssemblyUsersLoginOptions {
+    username: string // 用户名
+    password: string // 密码
+}
+
+/**
+ * 登录
+ */
+export function postAssemblyUsersLogin(options: POSTAssemblyUsersLoginOptions) {
+    return request({
+        url: `/assembly/users/login`,
+        method: 'POST',
+        data: options,
+    })
+}
+

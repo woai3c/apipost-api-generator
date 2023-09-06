@@ -1,0 +1,133 @@
+{
+	"project": {},
+	"apis": [
+		{
+			"target_type": "api",
+			"name": "登录",
+			"mark": "developing",
+			"sort": 126,
+			"tags": [],
+			"method": "POST",
+			"mock": "{}",
+			"mock_url": "/assembly/users/login",
+			"request": {
+				"url": "/assembly/users/login",
+				"description": "",
+				"event": {
+					"pre_script": "",
+					"test": ""
+				},
+				"body": {
+					"mode": "json",
+					"parameter": [],
+					"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"2d4a14c188108ce799d9433bf2e35953eddf0c4772fc49c5e35a6f77161d48fc\"\r\n}",
+					"raw_para": [
+						{
+							"key": "username",
+							"value": "张三",
+							"description": "用户名",
+							"not_null": 1,
+							"field_type": "String",
+							"type": "Text",
+							"is_checked": 1
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"description": "密码",
+							"not_null": 1,
+							"field_type": "String",
+							"type": "Text",
+							"is_checked": 1
+						}
+					]
+				},
+				"header": {
+					"parameter": [
+						{
+							"description": "",
+							"field_type": "String",
+							"is_checked": -1,
+							"key": "authFrom",
+							"value": "yunnanResources",
+							"not_null": 1,
+							"type": "Text"
+						}
+					]
+				}
+			},
+			"response": {
+				"success": {
+					"raw": "",
+					"parameter": [],
+					"expect": {
+						"name": "成功",
+						"isDefault": 1,
+						"code": 200,
+						"contentType": "json",
+						"verifyType": "mock",
+						"mock": "{\r\n\t\"token\": \"\",\r\n\t\"username\": \"\",\r\n\t\"userId\": \"\",\r\n}",
+						"schema": {
+							"type": "object",
+							"properties": {
+								"Token": {
+									"type": "string",
+									"mock": {
+										"mock": "@guid()"
+									}
+								},
+								"id": {
+									"type": "string",
+									"mock": {
+										"mock": "1111"
+									}
+								},
+								"createTime": {
+									"type": "string",
+									"mock": {
+										"mock": "@now('yyyy-MM-dd HH:mm:ss')"
+									}
+								},
+								"updateTime": {
+									"type": "string",
+									"mock": {
+										"mock": "@now('yyyy-MM-dd HH:mm:ss')"
+									}
+								},
+								"username": {
+									"type": "string",
+									"mock": {
+										"mock": "@cname()"
+									}
+								},
+								"password": {
+									"type": "string",
+									"mock": {
+										"mock": "@character(pool)"
+									}
+								}
+							},
+							"required": []
+						}
+					}
+				},
+				"error": {
+					"raw": "",
+					"parameter": [],
+					"expect": {
+						"name": "失败",
+						"isDefault": -1,
+						"code": 404,
+						"contentType": "json",
+						"verifyType": "mock",
+						"mock": "{\r\n\t\"code\": 404,\r\n    \"msg\": \"登陆失败。\",\r\n    \"success\": false\r\n}",
+						"schema": []
+					}
+				}
+			},
+			"children": []
+		}
+	],
+	"envs": [],
+	"models": []
+}
