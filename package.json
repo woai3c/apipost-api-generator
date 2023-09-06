@@ -1,7 +1,7 @@
 {
   "name": "apipost-api-generator",
   "description": "根据 apipost 导出的接口数据生成前端接口",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "main": "dist/apipost-api-generator.js",
   "module": "dist/apipost-api-generator.mjs",
   "types": "dist/index.d.ts",
