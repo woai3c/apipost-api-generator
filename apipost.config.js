@@ -17,6 +17,6 @@ module.exports = {
     },
     // api 文件输出目录 default: api-post-files
     output: '',
-    // 输出目录前是否要清空目录 default: false
-    clear: false,
+    // 输出目录前是否要清空目录 default: true
+    clear: true,
 }

@@ -6,6 +6,7 @@ import minimist from 'minimist'
 import { join } from 'path'
 import { isString } from 'lodash-es'
 import { readFileSync, removeSync } from 'fs-extra'
+import mergeAPIFiles from './parse/mergeAPIFiles'
 
 const cwd = process.cwd()
 const args = minimist(process.argv.slice(2))
@@ -39,6 +40,9 @@ if (config.clear) {
 }
 
 const files = parseFolder(apiPostJSON.apis as API[], config)
+
+mergeAPIFiles(files)
+
 writeFileTree(
     cwd,
     {
