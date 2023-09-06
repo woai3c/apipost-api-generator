@@ -19,6 +19,12 @@
     "type-generate": "tsc -p ./tsconfig.build.json && api-extractor run --config=./api-extractor.json && rimraf temp && node scripts/copyDTS.mjs",
     "release": "npm run build && npm run test && node scripts/release.mjs"
   },
+  "keywords": [
+    "apipost",
+    "api",
+    "generator",
+    "typescript"
+  ],
   "files": [
     "dist",
     "README.md",
