@@ -6,7 +6,7 @@
   "module": "dist/apipost-api-generator.mjs",
   "types": "dist/index.d.ts",
   "bin": {
-    "apipost": "dist/apipost-api-generator.js"
+    "apipost-api-generator": "dist/apipost-api-generator.js"
   },
   "scripts": {
     "dev": "rimraf dist && rollup --config rollup.config.ts --configPlugin typescript2 --environment NODE_ENV:development",
