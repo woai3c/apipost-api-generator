@@ -230,8 +230,15 @@ function parseRestfulParameter(generateType: 'api' | 'dto', keys: string[], data
 
     data.forEach((item: APIRequestParameter) => {
         const { description, key, field_type } = item
-        // 参数名不存在或参数名重复
-        if (!key || keys.includes(key)) return
+        // 参数名不存在
+        if (!key) return
+
+        // 参数名重复
+        if (keys.includes(key)) {
+            dynamicParameters.push(key)
+            return
+        }
+
         dynamicParameters.push(key)
 
         const finalType = safeTransformType(field_type)

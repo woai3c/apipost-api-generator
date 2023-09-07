@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 .rollup.cache
 api-post-files
+.vscode/launch.json
 
 # 打包分析报告
 stats.html
