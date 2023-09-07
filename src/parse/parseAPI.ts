@@ -26,7 +26,17 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
 
     importDTOClassSet = new Set()
 
-    if (body?.mode === 'form-data' && body.parameter.filter((item) => item.key).length) {
+    // 过滤空字段
+    if (body) {
+        body.parameter = body.parameter.filter((item) => item.key)
+        body.raw_para = body.raw_para.filter((item) => item.key)
+    }
+
+    if (query) {
+        query.parameter = query.parameter.filter((item) => item.key)
+    }
+
+    if (body?.mode === 'form-data' && body.parameter.length) {
         code += getInterfaceOrDTO(generateType, requestTypeName)
         requestOptionsType = 'data'
 
@@ -122,7 +132,7 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
                 code += '}\n\n'
             }
         }
-    } else if (body?.mode === 'urlencoded' && body.parameter.filter((item) => item.key).length) {
+    } else if (body?.mode === 'urlencoded' && body.parameter.length) {
         code += getInterfaceOrDTO(generateType, requestTypeName)
         requestOptionsType = 'data'
 
@@ -136,7 +146,7 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         dynamicParameters = parseResult.dynamicParameters
 
         code += '}\n\n'
-    } else if (query?.parameter?.filter((item) => item.key).length) {
+    } else if (query?.parameter?.length) {
         code += getInterfaceOrDTO(generateType, requestTypeName)
         requestOptionsType = 'params'
 
@@ -205,7 +215,7 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         } else {
             code += `${addIndent(2)}data: ${optionsCode},\n`
         }
-    } else if (query?.parameter?.filter((item) => item.key).length && method === 'GET') {
+    } else if (query?.parameter?.length && method === 'GET') {
         code += `${addIndent(2)}params: ${optionsCode},\n`
     }
 
