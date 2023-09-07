@@ -17,11 +17,13 @@ let importDTOClassSet: Set<string> = new Set()
 export default function parseAPI(api: API, config?: APIPostConfig): { code: string; importDTOClassSet: Set<string> } {
     let code = ''
     let requestOptionsType: '' | 'array' | 'params' | 'data' = ''
+    let dynamicParameters: string[] = []
     const generateType = config?.type || 'api'
     const { request, response, method = '', name } = api
     const { body, query, resful } = request
     const url = parseURL(request.url)
     const requestTypeName = `${method}${getAPIName(url, method, true)}${generateType === 'api' ? 'Options' : 'DTO'}`
+
     importDTOClassSet = new Set()
 
     if (body?.mode === 'form-data' && body.parameter.filter((item) => item.key).length) {
@@ -33,7 +35,10 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         })
 
         const keys = body.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
-        code += parseRestfulParameter(generateType, keys, resful?.parameter)
+        const parseResult = parseRestfulParameter(generateType, keys, resful?.parameter)
+        code += parseResult.code
+        dynamicParameters = parseResult.dynamicParameters
+
         code += '}\n\n'
     } else if (body?.mode === 'json' && (body.raw_schema?.properties || body.raw || body.raw_para.length)) {
         if (!body?.raw_schema?.properties) {
@@ -110,7 +115,10 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
                     code += '\n'
                 })
 
-                code += parseRestfulParameter(generateType, keys, resful?.parameter)
+                const parseResult = parseRestfulParameter(generateType, keys, resful?.parameter)
+                code += parseResult.code
+                dynamicParameters = parseResult.dynamicParameters
+
                 code += '}\n\n'
             }
         }
@@ -123,7 +131,10 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         })
 
         const keys = body.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
-        code += parseRestfulParameter(generateType, keys, resful?.parameter)
+        const parseResult = parseRestfulParameter(generateType, keys, resful?.parameter)
+        code += parseResult.code
+        dynamicParameters = parseResult.dynamicParameters
+
         code += '}\n\n'
     } else if (query?.parameter?.filter((item) => item.key).length) {
         code += getInterfaceOrDTO(generateType, requestTypeName)
@@ -134,7 +145,10 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
             code += getInterfaceOrDTOPropertyCode(generateType, param, i)
         })
 
-        code += parseRestfulParameter(generateType, keys, resful?.parameter)
+        const parseResult = parseRestfulParameter(generateType, keys, resful?.parameter)
+        code += parseResult.code
+        dynamicParameters = parseResult.dynamicParameters
+
         code += '}\n\n'
     }
 
@@ -175,18 +189,24 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         code += ') {\n'
     }
 
+    let optionsCode = 'options'
+    if (dynamicParameters.length) {
+        code += `${addIndent(1)}const { ${dynamicParameters.join(', ')}, ...rest } = options\n`
+        optionsCode = 'rest'
+    }
+
     code += `${addIndent(1)}return request({\n`
-    code += `${addIndent(2)}url: \`${parseURL(url, requestOptionsType, true)}\`,\n`
+    code += `${addIndent(2)}url: \`${parseURL(url, true)}\`,\n`
     code += `${addIndent(2)}method: '${method}',\n`
 
     if (requestOptionsType && body?.mode && method !== 'GET') {
         if (body.mode === 'urlencoded') {
-            code += `${addIndent(2)}data: new URLSearchParams(options as unknown as Record<string, string>),\n`
+            code += `${addIndent(2)}data: new URLSearchParams(${optionsCode} as unknown as Record<string, string>),\n`
         } else {
-            code += `${addIndent(2)}data: options,\n`
+            code += `${addIndent(2)}data: ${optionsCode},\n`
         }
     } else if (query?.parameter?.filter((item) => item.key).length && method === 'GET') {
-        code += `${addIndent(2)}params: options,\n`
+        code += `${addIndent(2)}params: ${optionsCode},\n`
     }
 
     code += `${addIndent(1)}})\n`
@@ -203,13 +223,16 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
 }
 
 function parseRestfulParameter(generateType: 'api' | 'dto', keys: string[], data?: APIRequestParameter[]) {
-    if (!data) return ''
-
     let code = ''
+    const dynamicParameters: string[] = []
+
+    if (!data) return { code, dynamicParameters }
+
     data.forEach((item: APIRequestParameter) => {
         const { description, key, field_type } = item
         // 参数名不存在或参数名重复
         if (!key || keys.includes(key)) return
+        dynamicParameters.push(key)
 
         const finalType = safeTransformType(field_type)
         if (generateType === 'dto') {
@@ -228,7 +251,7 @@ function parseRestfulParameter(generateType: 'api' | 'dto', keys: string[], data
         code += '\n'
     })
 
-    return code
+    return { code, dynamicParameters }
 }
 
 function getInterfaceOrDTOPropertyCode(generateType: 'api' | 'dto', param: APIRequestParameter, i: number) {

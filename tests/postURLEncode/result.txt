@@ -10,10 +10,11 @@ export type POSTTestIdResponse = Record<string, any>[]
  * test api
  */
 export function postTestId(options: POSTTestIdOptions): Promise<POSTTestIdResponse> {
+    const { id, ...rest } = options
     return request({
-        url: `/test/${options.id}`,
+        url: `/test/${id}`,
         method: 'POST',
-        data: new URLSearchParams(options as unknown as Record<string, string>),
+        data: new URLSearchParams(rest as unknown as Record<string, string>),
     })
 }
 

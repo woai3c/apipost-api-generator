@@ -105,12 +105,11 @@ export function responseRawDataToObject(data: APIRequestParameter[]) {
     return result
 }
 
-export function parseURL(url: string, requestOptionsType = '', needTransform = false) {
+export function parseURL(url: string, needTransform = false) {
     const result = url.split('?')[0]
     if (!needTransform) return result
-    const prefix = requestOptionsType === 'array' || !requestOptionsType ? '' : 'options.'
-    // :id => ${options.id}
-    return result.replace(/:\w+/g, (match: string) => `\${${prefix}${match.slice(1)}}`)
+
+    return result.replace(/:\w+/g, (match: string) => `\${${match.slice(1)}}`)
 }
 
 export function parseBodyRawPara(data: APIRequestParameter[]) {
