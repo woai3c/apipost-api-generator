@@ -49,7 +49,7 @@ module.exports = {
 }
 ```
 
-将 apipost 中的项目导出为 json 文件，放到根目录下，如下图：
+将 apipost 中的项目导出为 json 文件，放到根目录下，如下图所示：
 
 ![img](./docs/export.png)
 
