@@ -42,12 +42,12 @@ if (process.env.NODE_ENV === 'development') {
     })
 }
 
-const formats = ['cjs', 'es']
+const formats = ['cjs']
 
 function getOutput(format: ModuleFormat) {
     return {
         format,
-        file: `dist/${fileName}.${format === 'es' ? 'mjs' : 'js'}`,
+        file: `dist/${fileName}.js`,
     }
 }
 

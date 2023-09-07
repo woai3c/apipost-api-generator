@@ -28,8 +28,8 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         code += getInterfaceOrDTO(generateType, requestTypeName)
         requestOptionsType = 'data'
 
-        body.parameter.forEach((param: APIRequestParameter) => {
-            code += getInterfaceOrDTOPropertyCode(generateType, param)
+        body.parameter.forEach((param: APIRequestParameter, i) => {
+            code += getInterfaceOrDTOPropertyCode(generateType, param, i)
         })
 
         const keys = body.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
@@ -72,12 +72,12 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
                 code += getInterfaceOrDTO(generateType, requestTypeName)
 
                 const keys = Object.keys(properties)
-                keys.forEach((key) => {
+                keys.forEach((key, i) => {
                     const { type, description, oneOf, allOf, anyOf, items } = properties[key]
                     if (generateType === 'dto') {
                         const dtoType = getDTOType(type)
                         importDTOClassSet.add(dtoType)
-                        code += `\n${addIndent(1)}@${dtoType}()\n`
+                        code += `${i ? '\n' : ''}${addIndent(1)}@${dtoType}()\n`
 
                         if (required.includes(key)) {
                             code += `${addIndent(1)}@IsNotEmpty()\n`
@@ -121,8 +121,8 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         code += getInterfaceOrDTO(generateType, requestTypeName)
         requestOptionsType = 'data'
 
-        body.parameter.forEach((param: APIRequestParameter) => {
-            code += getInterfaceOrDTOPropertyCode(generateType, param)
+        body.parameter.forEach((param: APIRequestParameter, i) => {
+            code += getInterfaceOrDTOPropertyCode(generateType, param, i)
         })
 
         const keys = body.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
@@ -133,8 +133,8 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         requestOptionsType = 'params'
 
         const keys = query.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
-        query.parameter.forEach((param: APIRequestParameter) => {
-            code += getInterfaceOrDTOPropertyCode(generateType, param)
+        query.parameter.forEach((param: APIRequestParameter, i) => {
+            code += getInterfaceOrDTOPropertyCode(generateType, param, i)
         })
 
         code += parseRestfulParameter(generateType, keys, resful?.parameter)
@@ -234,7 +234,7 @@ function parseRestfulParameter(generateType: 'api' | 'dto', keys: string[], data
     return code
 }
 
-function getInterfaceOrDTOPropertyCode(generateType: 'api' | 'dto', param: APIRequestParameter) {
+function getInterfaceOrDTOPropertyCode(generateType: 'api' | 'dto', param: APIRequestParameter, i: number) {
     const { field_type, key, type, description, not_null } = param
     if (!key) return ''
 
@@ -243,7 +243,7 @@ function getInterfaceOrDTOPropertyCode(generateType: 'api' | 'dto', param: APIRe
     if (generateType === 'dto') {
         const dtoType = getDTOType(finalType)
         importDTOClassSet.add(dtoType)
-        code += `\n${addIndent(1)}@${dtoType}()\n`
+        code += `${i ? '\n' : ''}${addIndent(1)}@${dtoType}()\n`
 
         if (not_null !== -1) {
             code += `${addIndent(1)}@IsNotEmpty()\n`

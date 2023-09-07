@@ -10,10 +10,9 @@ module.exports = {
     //     return code
     // },
     // 文件名映射，示例：{ '文件上传': 'upload' }，生成的文件名是根据 apipost 中配置的名称生成的
-    // 如果这个文件名不是你想要的，可以通过这个配置进行转换
+    // 如果这个文件名不是你想要的，可以通过这个配置进行转换. 文件上传.ts -> upload.ts
     fileNameMap: {
-        插件管理: 'pluginManager',
-        新增插件: 'addPlugin',
+        文件上传: 'upload',
     },
     // api 文件输出目录 default: api-post-files
     output: '',

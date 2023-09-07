@@ -76,13 +76,14 @@ export function writeFileTree(dir: string, file: APIFile, config: APIPostConfig)
          *   - files.ts -> a + b 合成
          *   - c.ts -> z + x 合成
          */
+        const suffix = config.type === 'dto' ? '.dto.ts' : '.ts'
         let finalFileName = ''
         if (file.children?.length) {
             finalFileName = join(dir, fileName)
             fs.ensureDirSync(finalFileName)
-            finalFileName = join(finalFileName, fileName + '.ts')
+            finalFileName = join(finalFileName, fileName + suffix)
         } else {
-            finalFileName = join(dir, fileName + '.ts')
+            finalFileName = join(dir, fileName + suffix)
         }
 
         fs.writeFileSync(finalFileName, code)
