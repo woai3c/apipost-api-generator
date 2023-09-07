@@ -74,14 +74,11 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
                 const keys = Object.keys(properties)
                 keys.forEach((key, i) => {
                     const { type, description, oneOf, allOf, anyOf, items } = properties[key]
-                    if (generateType === 'dto') {
+                    if (generateType === 'dto' && required.includes(key)) {
                         const dtoType = getDTOType(type)
                         importDTOClassSet.add(dtoType)
                         code += `${i ? '\n' : ''}${addIndent(1)}@${dtoType}()\n`
-
-                        if (required.includes(key)) {
-                            code += `${addIndent(1)}@IsNotEmpty()\n`
-                        }
+                        code += `${addIndent(1)}@IsNotEmpty()\n`
                     }
 
                     code += `${addIndent(1)}${key}`
@@ -240,14 +237,11 @@ function getInterfaceOrDTOPropertyCode(generateType: 'api' | 'dto', param: APIRe
 
     let code = ''
     const finalType = type === 'File' ? type : safeTransformType(field_type)
-    if (generateType === 'dto') {
+    if (generateType === 'dto' && not_null !== -1) {
         const dtoType = getDTOType(finalType)
         importDTOClassSet.add(dtoType)
         code += `${i ? '\n' : ''}${addIndent(1)}@${dtoType}()\n`
-
-        if (not_null !== -1) {
-            code += `${addIndent(1)}@IsNotEmpty()\n`
-        }
+        code += `${addIndent(1)}@IsNotEmpty()\n`
     }
 
     code += `${addIndent(1)}${key}`
