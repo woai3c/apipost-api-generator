@@ -35,7 +35,7 @@ export default function parseAPI(api: API, config?: APIPostConfig): { code: stri
         const keys = body.parameter.map((item: APIRequestParameter) => item.key).filter(Boolean)
         code += parseRestfulParameter(generateType, keys, resful?.parameter)
         code += '}\n\n'
-    } else if (body?.mode === 'json' && (body.raw_schema || body.raw || body.raw_para.length)) {
+    } else if (body?.mode === 'json' && (body.raw_schema?.properties || body.raw || body.raw_para.length)) {
         if (!body?.raw_schema?.properties) {
             if (body.raw_para.length) {
                 try {
